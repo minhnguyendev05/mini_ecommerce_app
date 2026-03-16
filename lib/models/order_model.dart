@@ -1,4 +1,47 @@
-import 'cart_item_model.dart';
+import 'package:mini_ecommerce_app/models/cart_item_model.dart';
+
+class OrderStatus {
+  static const String PENDING = 'pending';
+  static const String SHIPPING = 'shipping';
+  static const String DELIVERED = 'delivered';
+  static const String CANCELLED = 'cancelled';
+
+  static const List<String> ALL = <String>[
+    PENDING,
+    SHIPPING,
+    DELIVERED,
+    CANCELLED,
+  ];
+
+  static String toDisplayText(String status) {
+    switch (status) {
+      case SHIPPING:
+        return 'Đang giao';
+      case DELIVERED:
+        return 'Đã giao';
+      case CANCELLED:
+        return 'Đã hủy';
+      case PENDING:
+      default:
+        return 'Chờ xác nhận';
+    }
+  }
+}
+
+class PaymentMethod {
+  static const String COD = 'COD';
+  static const String MOMO = 'MOMO';
+
+  static String toDisplayText(String method) {
+    switch (method) {
+      case MOMO:
+        return 'Momo';
+      case COD:
+      default:
+        return 'COD';
+    }
+  }
+}
 
 class OrderModel {
   const OrderModel({
@@ -6,13 +49,17 @@ class OrderModel {
     required this.items,
     required this.totalPrice,
     required this.createdAt,
-    this.status = 'Pending',
+    required this.shippingAddress,
+    required this.paymentMethod,
+    this.status = OrderStatus.PENDING,
   });
 
   final String id;
   final List<CartItem> items;
   final double totalPrice;
   final DateTime createdAt;
+  final String shippingAddress;
+  final String paymentMethod;
   final String status;
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -27,7 +74,9 @@ class OrderModel {
       createdAt:
           DateTime.tryParse((json['createdAt'] ?? '') as String) ??
           DateTime.now(),
-      status: (json['status'] ?? 'Pending') as String,
+      shippingAddress: (json['shippingAddress'] ?? '') as String,
+      paymentMethod: (json['paymentMethod'] ?? PaymentMethod.COD) as String,
+      status: (json['status'] ?? OrderStatus.PENDING) as String,
     );
   }
 
@@ -37,7 +86,21 @@ class OrderModel {
       'items': items.map((item) => item.toJson()).toList(),
       'totalPrice': totalPrice,
       'createdAt': createdAt.toIso8601String(),
+      'shippingAddress': shippingAddress,
+      'paymentMethod': paymentMethod,
       'status': status,
     };
+  }
+
+  OrderModel copyWith({String? status}) {
+    return OrderModel(
+      id: id,
+      items: items,
+      totalPrice: totalPrice,
+      createdAt: createdAt,
+      shippingAddress: shippingAddress,
+      paymentMethod: paymentMethod,
+      status: status ?? this.status,
+    );
   }
 }
