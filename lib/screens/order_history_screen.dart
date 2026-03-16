@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mini_ecommerce_app/models/order_model.dart';
+import 'package:mini_ecommerce_app/providers/order_provider.dart';
+import 'package:provider/provider.dart';
 
-/// OrderHistoryScreen - Người 5 phụ trách
-///
-/// Yêu cầu:
-/// - TabBar: Chờ xác nhận | Đang giao | Đã giao | Đã hủy
-/// - Mỗi tab hiển thị list order theo status
-/// - Card hiển thị: ID, ngày, số sản phẩm, tổng giá, status
-/// - Tap vào để xem chi tiết (optional)
-///
-/// TODO: Người 5 thực hiện screen này
+/// Màn hình lịch sử đơn hàng theo 4 trạng thái xử lý.
 class OrderHistoryScreen extends StatefulWidget {
   const OrderHistoryScreen({super.key});
 
@@ -50,16 +45,69 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
       body: TabBarView(
         controller: _tabController,
         children: [
-          // TODO: Chờ xác nhận
-          Center(child: Text('Orders pending (Người 5 thực hiện)')),
-          // TODO: Đang giao
-          Center(child: Text('Orders shipping (Người 5 thực hiện)')),
-          // TODO: Đã giao
-          Center(child: Text('Orders delivered (Người 5 thực hiện)')),
-          // TODO: Đã hủy
-          Center(child: Text('Orders cancelled (Người 5 thực hiện)')),
+          _OrderListByStatus(status: OrderStatus.PENDING),
+          _OrderListByStatus(status: OrderStatus.SHIPPING),
+          _OrderListByStatus(status: OrderStatus.DELIVERED),
+          _OrderListByStatus(status: OrderStatus.CANCELLED),
         ],
       ),
+    );
+  }
+}
+
+class _OrderListByStatus extends StatelessWidget {
+  const _OrderListByStatus({required this.status});
+
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<OrderProvider>(
+      builder: (_, provider, __) {
+        final orders = provider.getOrdersByStatus(status);
+
+        if (orders.isEmpty) {
+          return const Center(
+            child: Text('Chưa có đơn hàng nào ở mục này.'),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.all(12),
+          itemCount: orders.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (_, index) {
+            final order = orders[index];
+
+            return Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Mã đơn: #${order.id}',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 12),
+                    Text('Ngày: ${order.createdAt.toLocal()}'),
+                    Text('Số sản phẩm: ${order.items.length}'),
+                    Text(
+                      'Thanh toán: ${PaymentMethod.toDisplayText(order.paymentMethod)}',
+                    ),
+                    Text('Địa chỉ: ${order.shippingAddress}'),
+                    Text('Tổng tiền: \$${order.totalPrice.toStringAsFixed(2)}'),
+                    const SizedBox(height: 12),
+                    Chip(
+                      label: Text(OrderStatus.toDisplayText(order.status)),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
