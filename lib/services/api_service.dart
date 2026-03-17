@@ -15,10 +15,14 @@ class ApiService {
       throw Exception('Failed to load products: ${response.statusCode}');
     }
 
-    final List<dynamic> rawProducts =
-        jsonDecode(response.body) as List<dynamic>;
-    return rawProducts
-        .map((json) => Product.fromJson(json as Map<String, dynamic>))
-        .toList();
+    final decoded = jsonDecode(response.body);
+    if (decoded is! List) {
+      throw Exception('Unexpected API response format.');
+    }
+
+    return decoded
+        .whereType<Map<String, dynamic>>()
+        .map(Product.fromJson)
+        .toList(growable: false);
   }
 }

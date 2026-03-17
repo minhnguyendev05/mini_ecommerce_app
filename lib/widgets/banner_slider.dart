@@ -45,7 +45,7 @@ class _BannerSliderState extends State<BannerSlider> {
                     Image.network(
                       url,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) {
+                      errorBuilder: (context, error, stackTrace) {
                         return Container(
                           color: Colors.teal.shade100,
                           alignment: Alignment.center,
