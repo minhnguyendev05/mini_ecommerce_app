@@ -19,8 +19,14 @@ class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
   double _offset = 0;
   int _selectedCategoryIndex = 0;
+  String _searchQuery = '';
 
   static const List<_CategoryData> _categories = <_CategoryData>[
+    _CategoryData(
+      label: 'Tất cả',
+      icon: Icons.apps,
+      apiCategories: <String>{},
+    ),
     _CategoryData(
       label: 'Điện tử',
       icon: Icons.devices_other,
@@ -40,6 +46,26 @@ class _HomeScreenState extends State<HomeScreen> {
       label: 'Quần áo nữ',
       icon: Icons.woman_2_outlined,
       apiCategories: <String>{"women's clothing"},
+    ),
+    _CategoryData(
+      label: 'Gia dụng',
+      icon: Icons.kitchen_outlined,
+      apiCategories: <String>{'electronics', 'jewelery'},
+    ),
+    _CategoryData(
+      label: 'Làm đẹp',
+      icon: Icons.spa_outlined,
+      apiCategories: <String>{'jewelery', "women's clothing"},
+    ),
+    _CategoryData(
+      label: 'Phụ kiện',
+      icon: Icons.watch_outlined,
+      apiCategories: <String>{'jewelery', 'electronics'},
+    ),
+    _CategoryData(
+      label: 'Nam giới',
+      icon: Icons.sports_martial_arts_outlined,
+      apiCategories: <String>{"men's clothing"},
     ),
   ];
 
@@ -88,10 +114,39 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ratio = (_offset / 120).clamp(0.0, 1.0);
-    final appBarColor = Color.lerp(Colors.transparent, Colors.white, ratio);
+    final ratio = (_offset / 150).clamp(0.0, 1.0);
+    final easedRatio = Curves.easeOutCubic.transform(ratio);
+    final isForegroundDark = easedRatio < 0.5;
+    final appBarColor = Color.lerp(
+      const Color(0x0000A59B),
+      const Color(0xFF00897B),
+      easedRatio,
+    );
+    final appBarShadow = Color.lerp(
+      const Color(0x00000000),
+      const Color(0x29000000),
+      easedRatio,
+    );
+    final appBarTopColor = Color.lerp(
+      const Color(0x0000A59B),
+      const Color(0xFF00897B),
+      easedRatio,
+    );
+    final appBarBottomColor = Color.lerp(
+      const Color(0x0026C6DA),
+      const Color(0xFF00A59B),
+      easedRatio,
+    );
     final productProvider = context.watch<ProductProvider>();
     final selectedCategory = _categories[_selectedCategoryIndex];
+    final displayedProducts =
+        _searchQuery.trim().isEmpty
+            ? productProvider.products
+            : productProvider.products.where((product) {
+              final normalizedQuery = _searchQuery.toLowerCase().trim();
+              return product.title.toLowerCase().contains(normalizedQuery) ||
+                  product.category.toLowerCase().contains(normalizedQuery);
+            }).toList();
 
     return Scaffold(
       body: RefreshIndicator(
@@ -103,26 +158,46 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           slivers: [
             SliverAppBar(
-              expandedHeight: 88,
-              toolbarHeight: 72,
+              expandedHeight: 152,
+              toolbarHeight: 78,
               pinned: true,
               elevation: 0,
+              shadowColor: appBarShadow,
               backgroundColor: appBarColor,
               titleSpacing: 12,
               title: Text(
                 'TH4 - Nhóm 8',
                 style: TextStyle(
-                  color: ratio > 0.6 ? Colors.black87 : Colors.white,
-                  fontSize: 28,
+                  color: isForegroundDark ? Colors.black87 : Colors.white,
+                  fontSize: 26,
                   fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
                 ),
               ),
               flexibleSpace: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF00A59B), Color(0xFF26C6DA)],
+                    colors: [
+                      appBarTopColor ?? const Color(0xFF00A59B),
+                      appBarBottomColor ?? const Color(0xFF26C6DA),
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(74),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+                  child: _HomeSearchBar(
+                    scrollProgress: easedRatio,
+                    query: _searchQuery,
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                    },
                   ),
                 ),
               ),
@@ -132,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(right: 12),
                       child: badges.Badge(
-                        showBadge: cartProvider.totalQuantity > 0,
+                        showBadge: cartProvider.items.isNotEmpty,
                         position: badges.BadgePosition.topEnd(top: 2, end: 0),
                         badgeStyle: const badges.BadgeStyle(
                           padding: EdgeInsets.symmetric(
@@ -141,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         badgeContent: Text(
-                          '${cartProvider.totalQuantity}',
+                          '${cartProvider.items.length}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 11,
@@ -151,7 +226,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           onPressed: () => Navigator.pushNamed(context, '/cart'),
                           icon: Icon(
                             Icons.shopping_cart_outlined,
-                            color: ratio > 0.6 ? Colors.black87 : Colors.white,
+                            color:
+                                isForegroundDark ? Colors.black87 : Colors.white,
                           ),
                         ),
                       ),
@@ -160,63 +236,125 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _StickySearchDelegate(),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 12)),
-            const SliverToBoxAdapter(child: BannerSlider()),
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  'Danh mục nổi bật',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                ),
-              ),
-            ),
             const SliverToBoxAdapter(child: SizedBox(height: 10)),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 1.9,
+            const SliverToBoxAdapter(child: BannerSlider()),
+            const SliverToBoxAdapter(child: SizedBox(height: 14)),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFE8F8F6), Color(0xFFFFFFFF)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFD7EEEB)),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.grid_view_rounded, size: 16),
+                          SizedBox(width: 6),
+                          Text(
+                            'Danh mục nổi bật',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: 148,
+                        child: GridView.builder(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 8,
+                                crossAxisSpacing: 8,
+                                mainAxisExtent: 108,
+                                childAspectRatio: 1.7,
+                              ),
+                          itemBuilder: (context, index) {
+                            final item = _categories[index];
+                            return CategoryItem(
+                              label: item.label,
+                              icon: item.icon,
+                              isSelected: _selectedCategoryIndex == index,
+                              onTap: () {
+                                setState(() {
+                                  _selectedCategoryIndex = index;
+                                });
+                                context.read<ProductProvider>().setCategoryFilter(
+                                  item.apiCategories,
+                                );
+                              },
+                            );
+                          },
+                          itemCount: _categories.length,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final item = _categories[index];
-                  return CategoryItem(
-                    label: item.label,
-                    icon: item.icon,
-                    isSelected: _selectedCategoryIndex == index,
-                    onTap: () {
-                      setState(() {
-                        _selectedCategoryIndex = index;
-                      });
-                      context.read<ProductProvider>().setCategoryFilter(
-                        item.apiCategories,
-                      );
-                    },
-                  );
-                }, childCount: _categories.length),
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  'Sản phẩm ${selectedCategory.label}',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.local_fire_department, color: Colors.orange),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Gợi ý hôm nay • ${selectedCategory.label}',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '${displayedProducts.length} sản phẩm',
+                      style: const TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                  ],
                 ),
               ),
             ),
+            if (_searchQuery.trim().isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Kết quả cho "$_searchQuery"',
+                        style: const TextStyle(fontSize: 12, color: Colors.black54),
+                      ),
+                      const Spacer(),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _searchQuery = '';
+                          });
+                        },
+                        child: const Text('Xóa lọc'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             const SliverToBoxAdapter(child: SizedBox(height: 8)),
             if (productProvider.isInitialLoading && !productProvider.hasProducts)
               const SliverPadding(
@@ -234,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               )
-            else if (!productProvider.hasProducts)
+            else if (displayedProducts.isEmpty)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -251,10 +389,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisCount: 2,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio: 0.62,
+                    childAspectRatio: 0.6,
                   ),
                   delegate: SliverChildBuilderDelegate((context, index) {
-                    final product = productProvider.products[index];
+                    final product = displayedProducts[index];
                     return ProductCard(
                       product: product,
                       onTap: () {
@@ -276,7 +414,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                       },
                     );
-                  }, childCount: productProvider.products.length),
+                  }, childCount: displayedProducts.length),
                 ),
               ),
             if (productProvider.isLoadingMore)
@@ -401,36 +539,70 @@ class _ProductEmptyState extends StatelessWidget {
   }
 }
 
-class _StickySearchDelegate extends SliverPersistentHeaderDelegate {
+class _HomeSearchBar extends StatelessWidget {
+  const _HomeSearchBar({
+    required this.scrollProgress,
+    required this.query,
+    required this.onChanged,
+  });
+
+  final double scrollProgress;
+  final String query;
+  final ValueChanged<String> onChanged;
+
   @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-      child: SearchBar(
-        hintText: 'Tìm kiếm sản phẩm, danh mục...',
-        leading: const Icon(Icons.search),
-        shape: WidgetStatePropertyAll(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  Widget build(BuildContext context) {
+    final shellColor = Color.lerp(
+      const Color(0x00007E75),
+      const Color(0xCC007E75),
+      scrollProgress,
+    );
+    final borderColor = Color.lerp(
+      const Color(0x00000000),
+      const Color(0xCCFFFFFF),
+      scrollProgress,
+    );
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
+      decoration: BoxDecoration(
+        color: shellColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      padding: const EdgeInsets.all(6),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: borderColor ?? const Color(0x4DFFFFFF)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x1F000000),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
-        elevation: const WidgetStatePropertyAll(0),
+        child: SearchBar(
+          hintText: 'Tìm kiếm sản phẩm, danh mục...',
+          leading: const Icon(Icons.search),
+          trailing:
+              query.isEmpty
+                  ? null
+                  : [
+                    IconButton(
+                      onPressed: () => onChanged(''),
+                      icon: const Icon(Icons.close_rounded, size: 18),
+                    ),
+                  ],
+          onChanged: onChanged,
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+          elevation: const WidgetStatePropertyAll(0),
+          backgroundColor: const WidgetStatePropertyAll(Colors.white),
+        ),
       ),
     );
-  }
-
-  @override
-  double get maxExtent => 56;
-
-  @override
-  double get minExtent => 56;
-
-  @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-    return false;
   }
 }
 
