@@ -5,19 +5,27 @@ class CartItem {
     required this.product,
     required this.quantity,
     this.isSelected = true,
+    this.variation,
   });
 
   final Product product;
   final int quantity;
   final bool isSelected;
+  final String? variation;
 
   double get totalPrice => product.price * quantity;
 
-  CartItem copyWith({Product? product, int? quantity, bool? isSelected}) {
+  CartItem copyWith({
+    Product? product,
+    int? quantity,
+    bool? isSelected,
+    String? variation,
+  }) {
     return CartItem(
       product: product ?? this.product,
       quantity: quantity ?? this.quantity,
       isSelected: isSelected ?? this.isSelected,
+      variation: variation ?? this.variation,
     );
   }
 
@@ -26,6 +34,7 @@ class CartItem {
       product: Product.fromJson(json['product'] as Map<String, dynamic>),
       quantity: (json['quantity'] ?? 1) as int,
       isSelected: (json['isSelected'] ?? true) as bool,
+      variation: json['variation'] as String?,
     );
   }
 
@@ -34,6 +43,7 @@ class CartItem {
       'product': product.toJson(),
       'quantity': quantity,
       'isSelected': isSelected,
+      'variation': variation,
     };
   }
 }

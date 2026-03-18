@@ -17,12 +17,16 @@ class CartProvider extends ChangeNotifier {
   bool get isAllSelected =>
       _items.isNotEmpty && _items.values.every((item) => item.isSelected);
 
-  void addToCart(Product product) {
+  void addToCart(Product product, {String? variation}) {
     if (_items.containsKey(product.id)) {
       final existing = _items[product.id]!;
       _items[product.id] = existing.copyWith(quantity: existing.quantity + 1);
     } else {
-      _items[product.id] = CartItem(product: product, quantity: 1);
+      _items[product.id] = CartItem(
+        product: product,
+        quantity: 1,
+        variation: variation,
+      );
     }
     notifyListeners();
   }
@@ -38,7 +42,7 @@ class CartProvider extends ChangeNotifier {
     }
 
     if (quantity <= 0) {
-      removeFromCart(productId);
+      // Don't remove here, let UI handle confirmation
       return;
     }
 

@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-/// CartScreen - Người 4 phụ trách
+import '../providers/cart_provider.dart';
+import '../widgets/cart_item_widget.dart';
+
+/// CartScreen - Hiển thị giỏ hàng
 ///
-/// Yêu cầu:
-/// - Hiển thị danh sách giỏ hàng
-/// - Checkbox select/select all
-/// - Vuốt trái để xóa (Dismissible)
-/// - Quantity +/- buttons
-/// - Tính tổng tiền realtime
-/// - Button Thanh toán
-///
-/// TODO: Người 4 thực hiện screen này
+/// - Checkbox "Chọn tất cả" + auto-check when all selected
+/// - ListView cart items với Dismissible (vuốt trái để xóa)
+/// - Bottom bar: tổng tiền + button "Thanh toán"
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
@@ -18,50 +16,121 @@ class CartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Giỏ hàng')),
-      body: Column(
-        children: [
-          // TODO: Checkbox "Chọn tất cả"
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                Checkbox(value: false, onChanged: (_) {}),
-                const Text('Chọn tất cả'),
-              ],
-            ),
-          ),
-          // TODO: ListView cart items (với Dismissible)
-          Expanded(
-            child: Center(
+      body: Consumer<CartProvider>(
+        builder: (context, cartProvider, child) {
+          final items = cartProvider.items;
+
+          if (items.isEmpty) {
+            return const Center(
               child: Text(
-                'Cart Items Placeholder\n(Người 4 thực hiện)',
+                'Giỏ hàng trống\nThêm sản phẩm để bắt đầu mua sắm!',
                 textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
-            ),
-          ),
-          // TODO: Bottom bar: Tổng tiền + Thanh toán
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              border: const Border(top: BorderSide(color: Colors.black12)),
-            ),
-            child: Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Tổng: \$0.00',
-                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-                  ),
+            );
+          }
+
+          return Column(
+            children: [
+              // ListView cart items với Dismissible
+              Expanded(
+                child: ListView.builder(
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    return Dismissible(
+                      key: Key('cart_item_${item.product.id}'),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 20),
+                        color: Colors.red,
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      onDismissed: (_) {
+                        final removedItem = item;
+                        cartProvider.removeFromCart(item.product.id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${item.product.title} đã được xóa khỏi giỏ hàng',
+                            ),
+                            action: SnackBarAction(
+                              label: 'Hoàn tác',
+                              onPressed: () {
+                                cartProvider.addToCart(
+                                  removedItem.product,
+                                  variation: removedItem.variation,
+                                );
+                                // Set the correct quantity
+                                cartProvider.updateQuantity(
+                                  removedItem.product.id,
+                                  removedItem.quantity,
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                      child: CartItemWidget(cartItem: item),
+                    );
+                  },
                 ),
-                ElevatedButton(
-                  onPressed: () {},
-                  child: const Text('Thanh toán'),
+              ),
+              // Bottom bar: Checkbox chọn tất cả + Tổng tiền + Thanh toán
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  border: const Border(top: BorderSide(color: Colors.black12)),
                 ),
-              ],
-            ),
-          ),
-        ],
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Checkbox "Chọn tất cả"
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: cartProvider.isAllSelected,
+                          onChanged: (value) {
+                            if (value != null) {
+                              cartProvider.toggleSelectAll(value);
+                            }
+                          },
+                        ),
+                        const Text('Chọn tất cả'),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    // Tổng tiền + Button thanh toán
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Tổng: \$${cartProvider.getTotalPrice().toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: cartProvider.selectedItems.isNotEmpty
+                              ? () {
+                                  // Navigate to checkout
+                                  Navigator.pushNamed(context, '/checkout');
+                                }
+                              : null,
+                          child: const Text('Thanh toán'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

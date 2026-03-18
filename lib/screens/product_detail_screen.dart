@@ -66,7 +66,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text('Màu sắc', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Màu sắc',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   Wrap(
                     spacing: 8,
                     children: ['Trắng', 'Đen', 'Xanh'].map((color) {
@@ -84,7 +87,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     }).toList(),
                   ),
                   const SizedBox(height: 16),
-                  const Text('Kích thước', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Kích thước',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   Wrap(
                     spacing: 8,
                     children: ['S', 'M', 'L', 'XL'].map((size) {
@@ -139,10 +145,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       appBar: AppBar(
         title: const Text('Chi tiết sản phẩm'),
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.share_outlined),
-          ),
+          IconButton(onPressed: () {}, icon: const Icon(Icons.share_outlined)),
           IconButton(
             onPressed: () => Navigator.pushNamed(context, '/cart'),
             icon: const Icon(Icons.shopping_cart_outlined),
@@ -162,10 +165,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 child: PageView.builder(
                   itemCount: 3, // Mocking 3 images
                   itemBuilder: (context, index) {
-                    return Image.network(
-                      product.image,
-                      fit: BoxFit.contain,
-                    );
+                    return Image.network(product.image, fit: BoxFit.contain);
                   },
                 ),
               ),
@@ -200,7 +200,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 8),
                   Text(
                     product.title,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   const Divider(),
@@ -212,7 +215,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   Text(
                     product.description,
                     maxLines: _isExpanded ? null : 3,
-                    overflow: _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                    overflow: _isExpanded
+                        ? TextOverflow.visible
+                        : TextOverflow.ellipsis,
                   ),
                   InkWell(
                     onTap: () => setState(() => _isExpanded = !_isExpanded),
@@ -220,15 +225,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Text(
                         _isExpanded ? 'Thu gọn' : 'Xem thêm',
-                        style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.teal,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Chọn phân loại', style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('Màu: $_selectedColor, Size: $_selectedSize'),
+                    title: const Text(
+                      'Chọn phân loại',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      'Màu: $_selectedColor, Size: $_selectedSize',
+                    ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => _showSelectionBottomSheet(product),
                   ),
@@ -245,7 +258,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),

@@ -11,7 +11,7 @@ class OrderProvider extends ChangeNotifier {
     loadOrders();
   }
 
-  static const String ORDERS_KEY = 'orders_history';
+  static const String ordersKey = 'orders_history';
   List<OrderModel> _orders = <OrderModel>[];
 
   List<OrderModel> get orders => List<OrderModel>.unmodifiable(_orders);
@@ -22,14 +22,16 @@ class OrderProvider extends ChangeNotifier {
 
   Future<void> loadOrders() async {
     final prefs = await SharedPreferences.getInstance();
-    final rawOrders = prefs.getStringList(ORDERS_KEY) ?? <String>[];
+    final rawOrders = prefs.getStringList(ordersKey) ?? <String>[];
 
     _orders = rawOrders
-        .map((raw) => OrderModel.fromJson(
-              Map<String, dynamic>.from(
-                (jsonDecode(raw) as Map<String, dynamic>),
-              ),
-            ))
+        .map(
+          (raw) => OrderModel.fromJson(
+            Map<String, dynamic>.from(
+              (jsonDecode(raw) as Map<String, dynamic>),
+            ),
+          ),
+        )
         .toList();
 
     notifyListeners();
@@ -56,7 +58,7 @@ class OrderProvider extends ChangeNotifier {
       createdAt: DateTime.now(),
       shippingAddress: shippingAddress,
       paymentMethod: paymentMethod,
-      status: OrderStatus.PENDING,
+      status: OrderStatus.pending,
     );
 
     _orders = <OrderModel>[newOrder, ..._orders];
@@ -65,7 +67,7 @@ class OrderProvider extends ChangeNotifier {
   }
 
   Future<void> updateOrderStatus(String orderId, String status) async {
-    if (!OrderStatus.ALL.contains(status)) {
+    if (!OrderStatus.all.contains(status)) {
       return;
     }
 
@@ -82,6 +84,6 @@ class OrderProvider extends ChangeNotifier {
   Future<void> _persistOrders() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = _orders.map((order) => jsonEncode(order.toJson())).toList();
-    await prefs.setStringList(ORDERS_KEY, raw);
+    await prefs.setStringList(ordersKey, raw);
   }
 }

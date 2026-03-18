@@ -14,13 +14,13 @@ class CheckoutScreen extends StatefulWidget {
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
-  static const String SCREEN_TITLE = 'Thanh toán';
-  static const String PLACE_ORDER_BUTTON = 'Đặt hàng';
+  static const String screenTitle = 'Thanh toán';
+  static const String placeOrderButton = 'Đặt hàng';
 
   final _formKey = GlobalKey<FormState>();
   final _addressController = TextEditingController();
 
-  String _selectedPayment = PaymentMethod.COD;
+  String _selectedPayment = PaymentMethod.cod;
   bool _isSubmitting = false;
 
   @override
@@ -45,13 +45,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _isSubmitting = true;
     });
 
-    await context.read<OrderProvider>().placeOrder(
+    final orderProvider = context.read<OrderProvider>();
+    final cartProvider = context.read<CartProvider>();
+
+    await orderProvider.placeOrder(
       items: items,
       shippingAddress: _addressController.text.trim(),
       paymentMethod: _selectedPayment,
     );
 
-    context.read<CartProvider>().clearSelectedItems();
+    cartProvider.clearSelectedItems();
 
     if (!mounted) {
       return;
@@ -87,19 +90,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final routeArgs = ModalRoute.of(context)?.settings.arguments;
-    final routeItems =
-        routeArgs is List<CartItem> ? routeArgs : <CartItem>[];
-    final selectedItems =
-        routeItems.isNotEmpty
-            ? routeItems
-            : context.watch<CartProvider>().selectedItems;
+    final routeItems = routeArgs is List<CartItem> ? routeArgs : <CartItem>[];
+    final selectedItems = routeItems.isNotEmpty
+        ? routeItems
+        : context.watch<CartProvider>().selectedItems;
     final total = selectedItems.fold<double>(
       0,
       (sum, item) => sum + item.totalPrice,
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text(SCREEN_TITLE)),
+      appBar: AppBar(title: const Text(screenTitle)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -174,10 +175,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   Expanded(
                     child: ChoiceChip(
                       label: const Text('COD'),
-                      selected: _selectedPayment == PaymentMethod.COD,
+                      selected: _selectedPayment == PaymentMethod.cod,
                       onSelected: (_) {
                         setState(() {
-                          _selectedPayment = PaymentMethod.COD;
+                          _selectedPayment = PaymentMethod.cod;
                         });
                       },
                     ),
@@ -186,10 +187,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   Expanded(
                     child: ChoiceChip(
                       label: const Text('Momo'),
-                      selected: _selectedPayment == PaymentMethod.MOMO,
+                      selected: _selectedPayment == PaymentMethod.momo,
                       onSelected: (_) {
                         setState(() {
-                          _selectedPayment = PaymentMethod.MOMO;
+                          _selectedPayment = PaymentMethod.momo;
                         });
                       },
                     ),
@@ -218,8 +219,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : () => _placeOrder(selectedItems),
-                  child: Text(_isSubmitting ? 'Đang xử lý...' : PLACE_ORDER_BUTTON),
+                  onPressed: _isSubmitting
+                      ? null
+                      : () => _placeOrder(selectedItems),
+                  child: Text(
+                    _isSubmitting ? 'Đang xử lý...' : placeOrderButton,
+                  ),
                 ),
               ),
             ],
