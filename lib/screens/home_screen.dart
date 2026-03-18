@@ -114,6 +114,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+productlist
+    final ratio = (_offset / 120).clamp(0.0, 1.0);
+    final appBarColor = Color.lerp(
+      Colors.transparent,
+      const Color(0xFF00A59B),
+      ratio,
+
     final ratio = (_offset / 150).clamp(0.0, 1.0);
     final easedRatio = Curves.easeOutCubic.transform(ratio);
     final isForegroundDark = easedRatio < 0.5;
@@ -136,6 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
       const Color(0x0026C6DA),
       const Color(0xFF00A59B),
       easedRatio,
+main
     );
     final productProvider = context.watch<ProductProvider>();
     final selectedCategory = _categories[_selectedCategoryIndex];
@@ -168,8 +176,13 @@ class _HomeScreenState extends State<HomeScreen> {
               title: Text(
                 'TH4 - Nhóm 8',
                 style: TextStyle(
+productlist
+                  color: Colors.white,
+                  fontSize: 28,
+
                   color: isForegroundDark ? Colors.black87 : Colors.white,
                   fontSize: 26,
+ main
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.3,
                 ),
@@ -226,8 +239,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           onPressed: () => Navigator.pushNamed(context, '/cart'),
                           icon: Icon(
                             Icons.shopping_cart_outlined,
+ productlist
+                            color: Colors.white,
+
                             color:
                                 isForegroundDark ? Colors.black87 : Colors.white,
+main
                           ),
                         ),
                       ),
@@ -241,6 +258,52 @@ class _HomeScreenState extends State<HomeScreen> {
             const SliverToBoxAdapter(child: SizedBox(height: 14)),
             SliverToBoxAdapter(
               child: Padding(
+ productlist
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  'Danh mục nổi bật',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 10)),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 132,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final tileWidth = (constraints.maxWidth - 24 - 8) / 2;
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _categories.length,
+                      gridDelegate:
+                          SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 8,
+                            crossAxisSpacing: 8,
+                            mainAxisExtent: tileWidth,
+                          ),
+                      itemBuilder: (context, index) {
+                        final item = _categories[index];
+                        return CategoryItem(
+                          label: item.label,
+                          icon: item.icon,
+                          isSelected: _selectedCategoryIndex == index,
+                          onTap: () {
+                            setState(() {
+                              _selectedCategoryIndex = index;
+                            });
+                            context.read<ProductProvider>().setCategoryFilter(
+                              item.apiCategories,
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Container(
                   decoration: BoxDecoration(
@@ -304,6 +367,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
+ main
                 ),
               ),
             ),
