@@ -89,7 +89,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final ratio = (_offset / 120).clamp(0.0, 1.0);
-    final appBarColor = Color.lerp(Colors.transparent, Colors.white, ratio);
+    final appBarColor = Color.lerp(
+      Colors.transparent,
+      const Color(0xFF00A59B),
+      ratio,
+    );
     final productProvider = context.watch<ProductProvider>();
     final selectedCategory = _categories[_selectedCategoryIndex];
 
@@ -112,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
               title: Text(
                 'TH4 - Nhóm 8',
                 style: TextStyle(
-                  color: ratio > 0.6 ? Colors.black87 : Colors.white,
+                  color: Colors.white,
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
                 ),
@@ -132,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(right: 12),
                       child: badges.Badge(
-                        showBadge: cartProvider.totalQuantity > 0,
+                        showBadge: cartProvider.items.isNotEmpty,
                         position: badges.BadgePosition.topEnd(top: 2, end: 0),
                         badgeStyle: const badges.BadgeStyle(
                           padding: EdgeInsets.symmetric(
@@ -141,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         badgeContent: Text(
-                          '${cartProvider.totalQuantity}',
+                          '${cartProvider.items.length}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 11,
@@ -151,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onPressed: () => Navigator.pushNamed(context, '/cart'),
                           icon: Icon(
                             Icons.shopping_cart_outlined,
-                            color: ratio > 0.6 ? Colors.black87 : Colors.white,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -177,31 +181,43 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 10)),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 1.9,
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 132,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final tileWidth = (constraints.maxWidth - 24 - 8) / 2;
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _categories.length,
+                      gridDelegate:
+                          SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 8,
+                            crossAxisSpacing: 8,
+                            mainAxisExtent: tileWidth,
+                          ),
+                      itemBuilder: (context, index) {
+                        final item = _categories[index];
+                        return CategoryItem(
+                          label: item.label,
+                          icon: item.icon,
+                          isSelected: _selectedCategoryIndex == index,
+                          onTap: () {
+                            setState(() {
+                              _selectedCategoryIndex = index;
+                            });
+                            context.read<ProductProvider>().setCategoryFilter(
+                              item.apiCategories,
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
                 ),
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final item = _categories[index];
-                  return CategoryItem(
-                    label: item.label,
-                    icon: item.icon,
-                    isSelected: _selectedCategoryIndex == index,
-                    onTap: () {
-                      setState(() {
-                        _selectedCategoryIndex = index;
-                      });
-                      context.read<ProductProvider>().setCategoryFilter(
-                        item.apiCategories,
-                      );
-                    },
-                  );
-                }, childCount: _categories.length),
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
