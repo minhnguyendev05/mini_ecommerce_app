@@ -26,31 +26,64 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rating = product.rating;
+ productlist
     final soldCount = rating?.count ?? 0;
     final tagLabel = (rating?.rate ?? 0) >= 4.5 ? 'HOT' : 'MỚI';
 
+    final tag = _buildTag(product);
+    final soldText = _buildSoldText(rating?.count ?? 0);
+main
+
     return Card(
       clipBehavior: Clip.antiAlias,
+      elevation: 1.5,
       child: InkWell(
         onTap: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Hero(
-                tag: 'product-image-${product.id}',
-                child: CachedNetworkImage(
-                  imageUrl: product.image,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  placeholder: (context, url) => const _ShimmerPlaceholder(),
-                  errorWidget: (context, url, error) => Container(
-                    color: Colors.grey.shade100,
-                    child: const Center(
-                      child: Icon(Icons.broken_image_outlined, size: 30),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Hero(
+                    tag: 'product-image-${product.id}',
+                    child: CachedNetworkImage(
+                      imageUrl: product.image,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      placeholder: (context, url) => const _ShimmerPlaceholder(),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey.shade100,
+                        child: const Center(
+                          child: Icon(Icons.broken_image_outlined, size: 30),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEF5350),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        tag,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             Padding(
@@ -93,6 +126,7 @@ class ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 2),
                   Text(
+ productlist
                     'Đã bán $soldCount',
                     style: const TextStyle(fontSize: 12, color: Colors.black54),
                   ),
@@ -118,6 +152,18 @@ class ProductCard extends StatelessWidget {
                       style: TextStyle(fontSize: 12, color: Colors.black54),
                     ),
                   ],
+
+                    rating == null
+                        ? '0.0 (0)'
+                        : '${rating.rate.toStringAsFixed(1)} (${rating.count})',
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                  const Spacer(),
+                  Text(
+                    soldText,
+                    style: const TextStyle(fontSize: 11, color: Colors.black54),
+                  ),
+main
                 ],
               ),
             ),
@@ -201,4 +247,22 @@ class _ShimmerPlaceholderState extends State<_ShimmerPlaceholder>
       },
     );
   }
+}
+
+String _buildTag(Product product) {
+  if (product.price <= 25) {
+    return 'Giảm 50%';
+  }
+  if (product.rating != null && product.rating!.rate >= 4.6) {
+    return 'Yêu thích';
+  }
+  return 'Mall';
+}
+
+String _buildSoldText(int count) {
+  if (count >= 1000) {
+    final value = count / 1000;
+    return 'Đã bán ${value.toStringAsFixed(1)}k';
+  }
+  return 'Đã bán $count';
 }
