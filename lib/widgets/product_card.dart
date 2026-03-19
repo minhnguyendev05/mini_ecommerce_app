@@ -26,13 +26,10 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rating = product.rating;
- productlist
     final soldCount = rating?.count ?? 0;
     final tagLabel = (rating?.rate ?? 0) >= 4.5 ? 'HOT' : 'MỚI';
 
     final tag = _buildTag(product);
-    final soldText = _buildSoldText(rating?.count ?? 0);
-main
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -52,7 +49,8 @@ main
                       imageUrl: product.image,
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      placeholder: (context, url) => const _ShimmerPlaceholder(),
+                      placeholder: (context, url) =>
+                          const _ShimmerPlaceholder(),
                       errorWidget: (context, url, error) => Container(
                         color: Colors.grey.shade100,
                         child: const Center(
@@ -104,7 +102,10 @@ main
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.red.shade50,
                       borderRadius: BorderRadius.circular(6),
@@ -126,8 +127,7 @@ main
                   ),
                   const SizedBox(width: 2),
                   Text(
- productlist
-                    'Đã bán $soldCount',
+                    _buildSoldText(soldCount),
                     style: const TextStyle(fontSize: 12, color: Colors.black54),
                   ),
                   const Spacer(),
@@ -152,18 +152,6 @@ main
                       style: TextStyle(fontSize: 12, color: Colors.black54),
                     ),
                   ],
-
-                    rating == null
-                        ? '0.0 (0)'
-                        : '${rating.rate.toStringAsFixed(1)} (${rating.count})',
-                    style: const TextStyle(fontSize: 12, color: Colors.black54),
-                  ),
-                  const Spacer(),
-                  Text(
-                    soldText,
-                    style: const TextStyle(fontSize: 11, color: Colors.black54),
-                  ),
-main
                 ],
               ),
             ),
@@ -186,7 +174,10 @@ main
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     onPressed: onAddToCart,
-                    icon: const Icon(Icons.add_shopping_cart_outlined, size: 20),
+                    icon: const Icon(
+                      Icons.add_shopping_cart_outlined,
+                      size: 20,
+                    ),
                   ),
                 ],
               ),

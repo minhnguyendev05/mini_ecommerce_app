@@ -1,27 +1,27 @@
 import 'package:mini_ecommerce_app/models/cart_item_model.dart';
 
 class OrderStatus {
-  static const String PENDING = 'pending';
-  static const String SHIPPING = 'shipping';
-  static const String DELIVERED = 'delivered';
-  static const String CANCELLED = 'cancelled';
+  static const String pending = 'pending';
+  static const String shipping = 'shipping';
+  static const String delivered = 'delivered';
+  static const String cancelled = 'cancelled';
 
-  static const List<String> ALL = <String>[
-    PENDING,
-    SHIPPING,
-    DELIVERED,
-    CANCELLED,
+  static const List<String> all = <String>[
+    pending,
+    shipping,
+    delivered,
+    cancelled,
   ];
 
   static String toDisplayText(String status) {
     switch (status) {
-      case SHIPPING:
+      case shipping:
         return 'Đang giao';
-      case DELIVERED:
+      case delivered:
         return 'Đã giao';
-      case CANCELLED:
+      case cancelled:
         return 'Đã hủy';
-      case PENDING:
+      case pending:
       default:
         return 'Chờ xác nhận';
     }
@@ -29,14 +29,14 @@ class OrderStatus {
 }
 
 class PaymentMethod {
-  static const String COD = 'COD';
-  static const String MOMO = 'MOMO';
+  static const String cod = 'COD';
+  static const String momo = 'MOMO';
 
   static String toDisplayText(String method) {
     switch (method) {
-      case MOMO:
+      case momo:
         return 'Momo';
-      case COD:
+      case cod:
       default:
         return 'COD';
     }
@@ -51,7 +51,7 @@ class OrderModel {
     required this.createdAt,
     required this.shippingAddress,
     required this.paymentMethod,
-    this.status = OrderStatus.PENDING,
+    this.status = OrderStatus.pending,
   });
 
   final String id;
@@ -75,8 +75,8 @@ class OrderModel {
           DateTime.tryParse((json['createdAt'] ?? '') as String) ??
           DateTime.now(),
       shippingAddress: (json['shippingAddress'] ?? '') as String,
-      paymentMethod: (json['paymentMethod'] ?? PaymentMethod.COD) as String,
-      status: (json['status'] ?? OrderStatus.PENDING) as String,
+      paymentMethod: (json['paymentMethod'] ?? PaymentMethod.cod) as String,
+      status: (json['status'] ?? OrderStatus.pending) as String,
     );
   }
 

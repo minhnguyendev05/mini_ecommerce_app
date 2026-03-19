@@ -45,10 +45,10 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
       body: TabBarView(
         controller: _tabController,
         children: [
-          _OrderListByStatus(status: OrderStatus.PENDING),
-          _OrderListByStatus(status: OrderStatus.SHIPPING),
-          _OrderListByStatus(status: OrderStatus.DELIVERED),
-          _OrderListByStatus(status: OrderStatus.CANCELLED),
+          _OrderListByStatus(status: OrderStatus.pending),
+          _OrderListByStatus(status: OrderStatus.shipping),
+          _OrderListByStatus(status: OrderStatus.delivered),
+          _OrderListByStatus(status: OrderStatus.cancelled),
         ],
       ),
     );
@@ -63,19 +63,17 @@ class _OrderListByStatus extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<OrderProvider>(
-      builder: (_, provider, __) {
+      builder: (_, provider, _) {
         final orders = provider.getOrdersByStatus(status);
 
         if (orders.isEmpty) {
-          return const Center(
-            child: Text('Chưa có đơn hàng nào ở mục này.'),
-          );
+          return const Center(child: Text('Chưa có đơn hàng nào ở mục này.'));
         }
 
         return ListView.separated(
           padding: const EdgeInsets.all(12),
           itemCount: orders.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (_, index) {
             final order = orders[index];
 
@@ -98,9 +96,7 @@ class _OrderListByStatus extends StatelessWidget {
                     Text('Địa chỉ: ${order.shippingAddress}'),
                     Text('Tổng tiền: \$${order.totalPrice.toStringAsFixed(2)}'),
                     const SizedBox(height: 12),
-                    Chip(
-                      label: Text(OrderStatus.toDisplayText(order.status)),
-                    ),
+                    Chip(label: Text(OrderStatus.toDisplayText(order.status))),
                   ],
                 ),
               ),
