@@ -25,10 +25,106 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return ProductSelectionBottomSheet(
-          product: product,
-          initialSize: _selectedSize,
-          initialColor: _selectedColor,
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          image: DecorationImage(
+                            image: NetworkImage(product.image),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '\$${product.price}',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.teal,
+                              ),
+                            ),
+                            const Text('Kho: 123'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Màu sắc',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Wrap(
+                    spacing: 8,
+                    children: ['Trắng', 'Đen', 'Xanh'].map((color) {
+                      final isSelected = _selectedColor == color;
+                      return ChoiceChip(
+                        label: Text(color),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() => _selectedColor = color);
+                            setModalState(() {});
+                          }
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Kích thước',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Wrap(
+                    spacing: 8,
+                    children: ['S', 'M', 'L', 'XL'].map((size) {
+                      final isSelected = _selectedSize == size;
+                      return ChoiceChip(
+                        label: Text(size),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() => _selectedSize = size);
+                            setModalState(() {});
+                          }
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.read<CartProvider>().addToCart(product);
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Đã thêm vào giỏ hàng')),
+                        );
+                      },
+                      child: const Text('Xác nhận'),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         );
       },
     ).then((result) {
@@ -65,10 +161,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       appBar: AppBar(
         title: const Text('Chi tiết sản phẩm'),
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.share_outlined),
-          ),
+          IconButton(onPressed: () {}, icon: const Icon(Icons.share_outlined)),
           IconButton(
             onPressed: () => Navigator.pushNamed(context, '/cart'),
             icon: const Icon(Icons.shopping_cart_outlined),
@@ -88,10 +181,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 child: PageView.builder(
                   itemCount: 3,
                   itemBuilder: (context, index) {
-                    return Image.network(
-                      product.image,
-                      fit: BoxFit.contain,
-                    );
+                    return Image.network(product.image, fit: BoxFit.contain);
                   },
                 ),
               ),
@@ -140,7 +230,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 8),
                   Text(
                     product.title,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   const Divider(),
@@ -152,7 +245,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   Text(
                     product.description,
                     maxLines: _isExpanded ? null : 3,
-                    overflow: _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                    overflow: _isExpanded
+                        ? TextOverflow.visible
+                        : TextOverflow.ellipsis,
                   ),
                   InkWell(
                     onTap: () => setState(() => _isExpanded = !_isExpanded),
@@ -160,15 +255,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Text(
                         _isExpanded ? 'Thu gọn' : 'Xem thêm',
-                        style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.teal,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Chọn phân loại', style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('Màu: $_selectedColor, Size: $_selectedSize'),
+                    title: const Text(
+                      'Chọn phân loại',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      'Màu: $_selectedColor, Size: $_selectedSize',
+                    ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => _showSelectionBottomSheet(product),
                   ),
@@ -184,7 +287,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border(top: BorderSide(color: Colors.grey.shade200)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
         ),
         child: Row(
           children: [

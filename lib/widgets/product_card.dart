@@ -26,8 +26,10 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rating = product.rating;
+    final soldCount = rating?.count ?? 0;
+    final tagLabel = (rating?.rate ?? 0) >= 4.5 ? 'HOT' : 'MỚI';
+
     final tag = _buildTag(product);
-    final soldText = _buildSoldText(rating?.count ?? 0);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -47,7 +49,8 @@ class ProductCard extends StatelessWidget {
                       imageUrl: product.image,
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      placeholder: (context, url) => const _ShimmerPlaceholder(),
+                      placeholder: (context, url) =>
+                          const _ShimmerPlaceholder(),
                       errorWidget: (context, url, error) => Container(
                         color: Colors.grey.shade100,
                         child: const Center(
@@ -98,19 +101,57 @@ class ProductCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Row(
                 children: [
-                  const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      tagLabel,
+                      style: TextStyle(
+                        color: Colors.red.shade700,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Icon(
+                    Icons.inventory_2_outlined,
+                    color: Colors.black45,
+                    size: 14,
+                  ),
                   const SizedBox(width: 2),
                   Text(
-                    rating == null
-                        ? '0.0 (0)'
-                        : '${rating.rate.toStringAsFixed(1)} (${rating.count})',
+                    _buildSoldText(soldCount),
                     style: const TextStyle(fontSize: 12, color: Colors.black54),
                   ),
                   const Spacer(),
-                  Text(
-                    soldText,
-                    style: const TextStyle(fontSize: 11, color: Colors.black54),
-                  ),
+                  if (rating != null) ...[
+                    const Icon(
+                      Icons.star_rounded,
+                      color: Colors.amber,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      rating.rate.toStringAsFixed(1),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ] else ...[
+                    const Text(
+                      'N/A',
+                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -133,7 +174,10 @@ class ProductCard extends StatelessWidget {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     onPressed: onAddToCart,
-                    icon: const Icon(Icons.add_shopping_cart_outlined, size: 20),
+                    icon: const Icon(
+                      Icons.add_shopping_cart_outlined,
+                      size: 20,
+                    ),
                   ),
                 ],
               ),

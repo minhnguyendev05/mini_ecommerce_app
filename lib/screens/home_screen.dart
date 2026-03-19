@@ -22,11 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _searchQuery = '';
 
   static const List<_CategoryData> _categories = <_CategoryData>[
-    _CategoryData(
-      label: 'Tất cả',
-      icon: Icons.apps,
-      apiCategories: <String>{},
-    ),
+    _CategoryData(label: 'Tất cả', icon: Icons.apps, apiCategories: <String>{}),
     _CategoryData(
       label: 'Điện tử',
       icon: Icons.devices_other,
@@ -139,14 +135,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     final productProvider = context.watch<ProductProvider>();
     final selectedCategory = _categories[_selectedCategoryIndex];
-    final displayedProducts =
-        _searchQuery.trim().isEmpty
-            ? productProvider.products
-            : productProvider.products.where((product) {
-              final normalizedQuery = _searchQuery.toLowerCase().trim();
-              return product.title.toLowerCase().contains(normalizedQuery) ||
-                  product.category.toLowerCase().contains(normalizedQuery);
-            }).toList();
+    final displayedProducts = _searchQuery.trim().isEmpty
+        ? productProvider.products
+        : productProvider.products.where((product) {
+            final normalizedQuery = _searchQuery.toLowerCase().trim();
+            return product.title.toLowerCase().contains(normalizedQuery) ||
+                product.category.toLowerCase().contains(normalizedQuery);
+          }).toList();
+    _searchQuery.trim().isEmpty
+        ? productProvider.products
+        : productProvider.products.where((product) {
+            final normalizedQuery = _searchQuery.toLowerCase().trim();
+            return product.title.toLowerCase().contains(normalizedQuery) ||
+                product.category.toLowerCase().contains(normalizedQuery);
+          }).toList();
 
     return Scaffold(
       body: RefreshIndicator(
@@ -223,11 +225,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         child: IconButton(
-                          onPressed: () => Navigator.pushNamed(context, '/cart'),
+                          onPressed: () =>
+                              Navigator.pushNamed(context, '/cart'),
                           icon: Icon(
                             Icons.shopping_cart_outlined,
-                            color:
-                                isForegroundDark ? Colors.black87 : Colors.white,
+                            color: isForegroundDark
+                                ? Colors.black87
+                                : Colors.white,
                           ),
                         ),
                       ),
@@ -242,68 +246,48 @@ class _HomeScreenState extends State<HomeScreen> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFE8F8F6), Color(0xFFFFFFFF)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFD7EEEB)),
-                  ),
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.grid_view_rounded, size: 16),
-                          SizedBox(width: 6),
-                          Text(
-                            'Danh mục nổi bật',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
+                child: Text(
+                  'Danh mục nổi bật',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 10)),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 132,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final tileWidth = (constraints.maxWidth - 24 - 8) / 2;
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _categories.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                        mainAxisExtent: tileWidth,
                       ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 148,
-                        child: GridView.builder(
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 8,
-                                crossAxisSpacing: 8,
-                                mainAxisExtent: 108,
-                                childAspectRatio: 1.7,
-                              ),
-                          itemBuilder: (context, index) {
-                            final item = _categories[index];
-                            return CategoryItem(
-                              label: item.label,
-                              icon: item.icon,
-                              isSelected: _selectedCategoryIndex == index,
-                              onTap: () {
-                                setState(() {
-                                  _selectedCategoryIndex = index;
-                                });
-                                context.read<ProductProvider>().setCategoryFilter(
-                                  item.apiCategories,
-                                );
-                              },
+                      itemBuilder: (context, index) {
+                        final item = _categories[index];
+                        return CategoryItem(
+                          label: item.label,
+                          icon: item.icon,
+                          isSelected: _selectedCategoryIndex == index,
+                          onTap: () {
+                            setState(() {
+                              _selectedCategoryIndex = index;
+                            });
+                            context.read<ProductProvider>().setCategoryFilter(
+                              item.apiCategories,
                             );
                           },
-                          itemCount: _categories.length,
-                        ),
-                      ),
-                    ],
-                  ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
             ),
@@ -313,7 +297,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
                   children: [
-                    const Icon(Icons.local_fire_department, color: Colors.orange),
+                    const Icon(
+                      Icons.local_fire_department,
+                      color: Colors.orange,
+                    ),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
@@ -326,7 +313,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     Text(
                       '${displayedProducts.length} sản phẩm',
-                      style: const TextStyle(fontSize: 12, color: Colors.black54),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
                     ),
                   ],
                 ),
@@ -340,7 +330,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text(
                         'Kết quả cho "$_searchQuery"',
-                        style: const TextStyle(fontSize: 12, color: Colors.black54),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black54,
+                        ),
                       ),
                       const Spacer(),
                       TextButton(
@@ -356,7 +349,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             const SliverToBoxAdapter(child: SizedBox(height: 8)),
-            if (productProvider.isInitialLoading && !productProvider.hasProducts)
+            if (productProvider.isInitialLoading &&
+                !productProvider.hasProducts)
               const SliverPadding(
                 padding: EdgeInsets.symmetric(horizontal: 12),
                 sliver: _ProductGridSkeletonSliver(),
@@ -368,7 +362,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.all(12),
                   child: _ProductErrorState(
                     message: productProvider.errorMessage!,
-                    onRetry: () => productProvider.fetchProducts(forceRefresh: true),
+                    onRetry: () =>
+                        productProvider.fetchProducts(forceRefresh: true),
                   ),
                 ),
               )
@@ -408,7 +403,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           ..hideCurrentSnackBar()
                           ..showSnackBar(
                             SnackBar(
-                              content: Text('Đã thêm ${product.title} vào giỏ.'),
+                              content: Text(
+                                'Đã thêm ${product.title} vào giỏ.',
+                              ),
                               duration: const Duration(seconds: 1),
                             ),
                           );
@@ -502,15 +499,9 @@ class _ProductErrorState extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            message,
-            style: TextStyle(color: Colors.red.shade700),
-          ),
+          Text(message, style: TextStyle(color: Colors.red.shade700)),
           const SizedBox(height: 8),
-          FilledButton.tonal(
-            onPressed: onRetry,
-            child: const Text('Thử lại'),
-          ),
+          FilledButton.tonal(onPressed: onRetry, child: const Text('Thử lại')),
         ],
       ),
     );
@@ -585,15 +576,14 @@ class _HomeSearchBar extends StatelessWidget {
         child: SearchBar(
           hintText: 'Tìm kiếm sản phẩm, danh mục...',
           leading: const Icon(Icons.search),
-          trailing:
-              query.isEmpty
-                  ? null
-                  : [
-                    IconButton(
-                      onPressed: () => onChanged(''),
-                      icon: const Icon(Icons.close_rounded, size: 18),
-                    ),
-                  ],
+          trailing: query.isEmpty
+              ? null
+              : [
+                  IconButton(
+                    onPressed: () => onChanged(''),
+                    icon: const Icon(Icons.close_rounded, size: 18),
+                  ),
+                ],
           onChanged: onChanged,
           shape: WidgetStatePropertyAll(
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
