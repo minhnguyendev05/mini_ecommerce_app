@@ -1,25 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../models/product_model.dart';
-import '../providers/cart_provider.dart';
+
+class ProductSelectionResult {
+  const ProductSelectionResult({
+    required this.size,
+    required this.color,
+    required this.quantity,
+  });
+
+  final String size;
+  final String color;
+  final int quantity;
+
+  String get variationLabel => 'Size: $size, Màu: $color';
+}
 
 class ProductSelectionBottomSheet extends StatefulWidget {
   final Product product;
   final String initialSize;
   final String initialColor;
+  final String confirmText;
 
   const ProductSelectionBottomSheet({
     super.key,
     required this.product,
     this.initialSize = 'M',
     this.initialColor = 'Trắng',
+    this.confirmText = 'Xác nhận',
   });
 
   @override
-  State<ProductSelectionBottomSheet> createState() => _ProductSelectionBottomSheetState();
+  State<ProductSelectionBottomSheet> createState() =>
+      _ProductSelectionBottomSheetState();
 }
 
-class _ProductSelectionBottomSheetState extends State<ProductSelectionBottomSheet> {
+class _ProductSelectionBottomSheetState
+    extends State<ProductSelectionBottomSheet> {
   late String _selectedSize;
   late String _selectedColor;
   int _quantity = 1;
@@ -89,7 +105,10 @@ class _ProductSelectionBottomSheetState extends State<ProductSelectionBottomShee
             }).toList(),
           ),
           const SizedBox(height: 16),
-          const Text('Kích thước', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text(
+            'Kích thước',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           Wrap(
             spacing: 8,
             children: ['S', 'M', 'L', 'XL'].map((size) {
@@ -109,7 +128,10 @@ class _ProductSelectionBottomSheetState extends State<ProductSelectionBottomShee
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Số lượng', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'Số lượng',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey.shade300),
@@ -118,10 +140,18 @@ class _ProductSelectionBottomSheetState extends State<ProductSelectionBottomShee
                 child: Row(
                   children: [
                     IconButton(
-                      onPressed: _quantity > 1 ? () => setState(() => _quantity--) : null,
+                      onPressed: _quantity > 1
+                          ? () => setState(() => _quantity--)
+                          : null,
                       icon: const Icon(Icons.remove),
                     ),
-                    Text('$_quantity', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text(
+                      '$_quantity',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     IconButton(
                       onPressed: () => setState(() => _quantity++),
                       icon: const Icon(Icons.add),
@@ -136,20 +166,21 @@ class _ProductSelectionBottomSheetState extends State<ProductSelectionBottomShee
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                // Logic to add to cart with quantity, size, color could be added to CartProvider
-                context.read<CartProvider>().addToCart(widget.product); 
-                Navigator.pop(context, {
-                  'size': _selectedSize,
-                  'color': _selectedColor,
-                  'quantity': _quantity,
-                });
+                Navigator.pop(
+                  context,
+                  ProductSelectionResult(
+                    size: _selectedSize,
+                    color: _selectedColor,
+                    quantity: _quantity,
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.teal,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              child: const Text('Xác nhận'),
+              child: Text(widget.confirmText),
             ),
           ),
         ],
