@@ -7,8 +7,12 @@ import '../models/product_model.dart';
 class ApiService {
   static const String _baseUrl = 'https://fakestoreapi.com';
 
-  Future<List<Product>> fetchProducts() async {
-    final uri = Uri.parse('$_baseUrl/products');
+  Future<List<Product>> fetchProducts({int? limit}) async {
+    final uri = Uri.parse('$_baseUrl/products').replace(
+      queryParameters: limit != null
+          ? <String, String>{'limit': '$limit'}
+          : null,
+    );
     final response = await http.get(uri);
 
     if (response.statusCode != 200) {

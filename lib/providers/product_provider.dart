@@ -22,6 +22,7 @@ class ProductProvider extends ChangeNotifier {
   final List<Product> _filteredProducts = <Product>[];
   final List<Product> _visibleProducts = <Product>[];
   Set<String> _categoryFilter = <String>{};
+  bool _hasReachedApiEnd = false;
 
   bool _isInitialLoading = false;
   bool _isRefreshing = false;
@@ -34,14 +35,17 @@ class ProductProvider extends ChangeNotifier {
   bool get isLoadingMore => _isLoadingMore;
   String? get errorMessage => _errorMessage;
   bool get hasProducts => _visibleProducts.isNotEmpty;
-  bool get hasMore => _visibleProducts.length < _filteredProducts.length;
+  bool get hasMore =>
+      _visibleProducts.length < _filteredProducts.length || !_hasReachedApiEnd;
 
   Future<void> fetchProducts({bool forceRefresh = false}) async {
     if (_isInitialLoading || _isRefreshing) {
       return;
     }
 
-    if (_allProducts.isNotEmpty && !forceRefresh) {
+    if (_allProducts.isNotEmpty &&
+        !forceRefresh &&
+        _visibleProducts.isNotEmpty) {
       return;
     }
 
@@ -54,11 +58,11 @@ class ProductProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final fetched = await _apiService.fetchProducts();
-      _allProducts
-        ..clear()
-        ..addAll(fetched);
+      _allProducts.clear();
+      _hasReachedApiEnd = false;
+      await _loadMoreFromApi();
       _applyCategoryFilter(resetVisible: true);
+      _appendVisiblePage();
     } catch (_) {
       _errorMessage = 'Không thể tải sản phẩm. Vui lòng thử lại.';
     } finally {
@@ -83,6 +87,7 @@ class ProductProvider extends ChangeNotifier {
 
     _categoryFilter = normalized;
     _applyCategoryFilter(resetVisible: true);
+    _appendVisiblePage();
     notifyListeners();
   }
 
@@ -94,16 +99,17 @@ class ProductProvider extends ChangeNotifier {
     _isLoadingMore = true;
     notifyListeners();
 
-    await Future<void>.delayed(const Duration(milliseconds: 350));
+    try {
+      if (_visibleProducts.length >= _filteredProducts.length &&
+          !_hasReachedApiEnd) {
+        await _loadMoreFromApi();
+        _applyCategoryFilter(resetVisible: false);
+      }
 
-    final nextEndIndex = (_visibleProducts.length + _pageSize).clamp(
-      0,
-      _filteredProducts.length,
-    );
-
-    _visibleProducts
-      ..clear()
-      ..addAll(_filteredProducts.take(nextEndIndex));
+      _appendVisiblePage();
+    } catch (_) {
+      _errorMessage = 'Không thể tải thêm sản phẩm. Vui lòng thử lại.';
+    }
 
     _isLoadingMore = false;
     notifyListeners();
@@ -124,8 +130,34 @@ class ProductProvider extends ChangeNotifier {
       return;
     }
 
+    _visibleProducts.clear();
+  }
+
+  Future<void> _loadMoreFromApi() async {
+    final requestLimit = _allProducts.length + _pageSize;
+    final fetched = await _apiService.fetchProducts(limit: requestLimit);
+
+    if (fetched.length <= _allProducts.length) {
+      _hasReachedApiEnd = true;
+      return;
+    }
+
+    final existingIds = _allProducts.map((item) => item.id).toSet();
+    for (final product in fetched) {
+      if (!existingIds.contains(product.id)) {
+        _allProducts.add(product);
+      }
+    }
+  }
+
+  void _appendVisiblePage() {
+    final nextEndIndex = (_visibleProducts.length + _pageSize).clamp(
+      0,
+      _filteredProducts.length,
+    );
+
     _visibleProducts
       ..clear()
-      ..addAll(_filteredProducts.take(_pageSize));
+      ..addAll(_filteredProducts.take(nextEndIndex));
   }
 }

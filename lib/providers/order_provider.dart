@@ -8,11 +8,12 @@ import 'package:mini_ecommerce_app/models/order_model.dart';
 /// Quản lý danh sách đơn hàng và lưu cục bộ bằng SharedPreferences.
 class OrderProvider extends ChangeNotifier {
   OrderProvider() {
-    loadOrders();
+    _initialLoadTask = _loadOrdersInternal();
   }
 
   static const String ordersKey = 'orders_history';
   List<OrderModel> _orders = <OrderModel>[];
+  Future<void>? _initialLoadTask;
 
   List<OrderModel> get orders => List<OrderModel>.unmodifiable(_orders);
 
@@ -21,6 +22,10 @@ class OrderProvider extends ChangeNotifier {
   }
 
   Future<void> loadOrders() async {
+    await _loadOrdersInternal();
+  }
+
+  Future<void> _loadOrdersInternal() async {
     final prefs = await SharedPreferences.getInstance();
     final rawOrders = prefs.getStringList(ordersKey) ?? <String>[];
 
@@ -37,11 +42,17 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> _ensureLoaded() async {
+    await _initialLoadTask;
+  }
+
   Future<void> placeOrder({
     required List<CartItem> items,
     required String shippingAddress,
     required String paymentMethod,
   }) async {
+    await _ensureLoaded();
+
     if (items.isEmpty) {
       return;
     }
@@ -67,6 +78,8 @@ class OrderProvider extends ChangeNotifier {
   }
 
   Future<void> updateOrderStatus(String orderId, String status) async {
+    await _ensureLoaded();
+
     if (!OrderStatus.all.contains(status)) {
       return;
     }

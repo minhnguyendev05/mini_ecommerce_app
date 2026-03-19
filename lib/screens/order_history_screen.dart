@@ -4,52 +4,44 @@ import 'package:mini_ecommerce_app/providers/order_provider.dart';
 import 'package:provider/provider.dart';
 
 /// Màn hình lịch sử đơn hàng theo 4 trạng thái xử lý.
-class OrderHistoryScreen extends StatefulWidget {
+class OrderHistoryScreen extends StatelessWidget {
   const OrderHistoryScreen({super.key});
 
   @override
-  State<OrderHistoryScreen> createState() => _OrderHistoryScreenState();
-}
-
-class _OrderHistoryScreenState extends State<OrderHistoryScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lịch sử đơn hàng'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Chờ xác nhận'),
-            Tab(text: 'Đang giao'),
-            Tab(text: 'Đã giao'),
-            Tab(text: 'Đã hủy'),
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Lịch sử đơn hàng'),
+          actions: [
+            TextButton.icon(
+              onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/home',
+                (route) => false,
+              ),
+              icon: const Icon(Icons.home_outlined),
+              label: const Text('Trang chủ'),
+            ),
+          ],
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Chờ xác nhận'),
+              Tab(text: 'Đang giao'),
+              Tab(text: 'Đã giao'),
+              Tab(text: 'Đã hủy'),
+            ],
+          ),
+        ),
+        body: const TabBarView(
+          children: [
+            _OrderListByStatus(status: OrderStatus.pending),
+            _OrderListByStatus(status: OrderStatus.shipping),
+            _OrderListByStatus(status: OrderStatus.delivered),
+            _OrderListByStatus(status: OrderStatus.cancelled),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _OrderListByStatus(status: OrderStatus.pending),
-          _OrderListByStatus(status: OrderStatus.shipping),
-          _OrderListByStatus(status: OrderStatus.delivered),
-          _OrderListByStatus(status: OrderStatus.cancelled),
-        ],
       ),
     );
   }

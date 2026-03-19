@@ -64,7 +64,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _isSubmitting = false;
     });
 
-    await showDialog<void>(
+    final shouldOpenOrders = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
@@ -72,8 +72,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           content: const Text('Cảm ơn bạn. Đơn hàng của bạn đã được ghi nhận.'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('OK'),
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Về trang chủ'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Xem đơn mua'),
             ),
           ],
         );
@@ -81,6 +85,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
 
     if (!mounted) {
+      return;
+    }
+
+    if (shouldOpenOrders == true) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/orders',
+        ModalRoute.withName('/home'),
+      );
       return;
     }
 

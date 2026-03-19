@@ -8,6 +8,7 @@ import 'screens/cart_screen.dart';
 import 'screens/checkout_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/order_history_screen.dart';
+import 'screens/product_chat_screen.dart';
 import 'screens/product_detail_screen.dart';
 
 void main() {
@@ -65,6 +66,7 @@ class MiniEcommerceApp extends StatelessWidget {
         routes: {
           '/home': (_) => const HomeScreen(),
           '/productDetail': (_) => const ProductDetailScreen(),
+          '/productChat': (_) => const ProductChatScreen(),
           '/cart': (_) => const CartScreen(),
           '/checkout': (_) => const CheckoutScreen(),
           '/orders': (_) => const OrderHistoryScreen(),

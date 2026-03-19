@@ -204,6 +204,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               actions: [
+                IconButton(
+                  onPressed: () => Navigator.pushNamed(context, '/orders'),
+                  icon: Icon(
+                    Icons.receipt_long_outlined,
+                    color: isForegroundDark ? Colors.black87 : Colors.white,
+                  ),
+                  tooltip: 'Don mua',
+                ),
                 Consumer<CartProvider>(
                   builder: (context, cartProvider, child) {
                     return Padding(
