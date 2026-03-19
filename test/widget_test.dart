@@ -14,6 +14,6 @@ void main() {
     await tester.pumpWidget(const MiniEcommerceApp());
     await tester.pump();
 
-    expect(find.text('TH4 - Nhóm X'), findsOneWidget);
+    expect(find.text('TH4 - Nhóm 8'), findsOneWidget);
   });
 }
