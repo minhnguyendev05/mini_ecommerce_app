@@ -12,10 +12,10 @@ class _BannerSliderState extends State<BannerSlider> {
   int _currentIndex = 0;
 
   static const List<String> _banners = <String>[
-    'https://magiamgiashopee.vn/wp-content/uploads/2024/03/shopee-3.3.webp',
-    'https://magiamgia.com/wp-content/uploads/2025/02/Bloggiamgia-1000-x-500-px-1.webp',
-    'https://images.bloggiamgia.vn/01-03-2026/Shopee-3-1772357636649.webp',
-    'https://images.bloggiamgia.vn/01-03-2026/Shopee-3-1772358568657.webp',
+    'https://wsrv.nl/?url=https://magiamgiashopee.vn/wp-content/uploads/2024/03/shopee-3.3.webp&output=jpg',
+    'https://wsrv.nl/?url=https://magiamgia.com/wp-content/uploads/2025/02/Bloggiamgia-1000-x-500-px-1.webp&output=jpg',
+    'https://wsrv.nl/?url=https://images.bloggiamgia.vn/01-03-2026/Shopee-3-1772357636649.webp&output=jpg',
+    'https://wsrv.nl/?url=https://images.bloggiamgia.vn/01-03-2026/Shopee-3-1772358568657.webp&output=jpg',
   ];
 
   @override
